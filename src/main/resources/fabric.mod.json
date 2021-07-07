@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "misguidedmod",
+  "version": "${version}",
+
+  "name": "Misguided Mod",
+  "description": "An extremely misguided mod.",
+  "authors": [
+    "Sockmower"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/Sockmower/MisguidedMod"
+  },
+
+  "license": "lgpl-2.1",
+  "icon": "assets/misguidedmod/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "dev.sockmower.misguidedmod.MisguidedClientMod"
+    ]
+  },
+  "mixins": [
+    "misguidedmod.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+
+  }
+}

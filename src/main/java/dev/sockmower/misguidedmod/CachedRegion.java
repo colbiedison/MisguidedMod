@@ -10,17 +10,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.BufferUtils;
 
-import dev.sockmower.misguidedmod.repack.io.airlift.compress.zstd.ZstdCompressor;
-import dev.sockmower.misguidedmod.repack.io.airlift.compress.zstd.ZstdDecompressor;
+import dev.sockmower.misguidedmod.repack.io.airlift.compress.zstd.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.SPacketChunkData;
 
 public class CachedRegion implements Closeable {
     public static final int CHUNKS_PER_REGION = 32 * 32;
@@ -90,9 +89,9 @@ public class CachedRegion implements Closeable {
         buffer.writeBytes(decompressed);
         buffer.readerIndex(0);
 
-        SPacketChunkData chunkPacket = new SPacketChunkData();
+        ChunkDataS2CPacket chunkPacket = new ChunkDataS2CPacket();
         try {
-            chunkPacket.readPacketData(new PacketBuffer(buffer));
+            chunkPacket.read(new PacketByteBuf(buffer));
         } catch (Exception ignored) {
             logger.warn("Malformed chunk at {}", pos.toString());
             return null;
@@ -115,8 +114,8 @@ public class CachedRegion implements Closeable {
     void writeChunk(CachedChunk chunk) throws IOException {
         ChunkHeader header = getChunkHeader(chunk.pos);
 
-        PacketBuffer buffer = new PacketBuffer(Unpooled.buffer());
-        chunk.packet.writePacketData(buffer);
+        PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
+        chunk.packet.write(buffer);
         int size = buffer.readableBytes();
 
         ByteBuffer chunkData = BufferUtils.createByteBuffer(size);

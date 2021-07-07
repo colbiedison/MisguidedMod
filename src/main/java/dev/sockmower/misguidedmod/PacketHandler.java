@@ -8,8 +8,8 @@ import io.netty.channel.ChannelOutboundHandler;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.SPacketChunkData;
-import net.minecraft.network.play.server.SPacketUnloadChunk;
+import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
+import net.minecraft.network.packet.s2c.play.UnloadChunkS2CPacket;
 
 /**
  * Hook into Minecraft's packet pipeline
@@ -18,25 +18,25 @@ import net.minecraft.network.play.server.SPacketUnloadChunk;
 @ChannelHandler.Sharable
 public class PacketHandler extends SimpleChannelInboundHandler<Packet<?>> implements ChannelOutboundHandler {
 
-    static final String NAME = MisguidedMod.MODID + ":packet_handler";
+    static final String NAME = MisguidedClientMod.MODID + ":packet_handler";
 
-    private final MisguidedMod moreChunks;
+    private final MisguidedClientMod moreChunks;
 
-    public PacketHandler(MisguidedMod moreChunks) {
+    public PacketHandler(MisguidedClientMod moreChunks) {
         this.moreChunks = moreChunks;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Packet<?> packet) throws Exception {
-        if (packet instanceof SPacketUnloadChunk) {
+        if (packet instanceof UnloadChunkS2CPacket) {
             return; // ignore packet, we manually unload our chunks
         }
-        if (packet instanceof SPacketChunkData) {
+        if (packet instanceof ChunkDataS2CPacket) {
             try {
-                final SPacketChunkData chunkPacket = (SPacketChunkData) packet;
+                final ChunkDataS2CPacket chunkPacket = (ChunkDataS2CPacket) packet;
                 if (chunkPacket.isFullChunk()) {
                     // full chunk, not just a section
-                    final Pos2 pos = new Pos2(chunkPacket.getChunkX(), chunkPacket.getChunkZ());
+                    final Pos2 pos = new Pos2(chunkPacket.getX(), chunkPacket.getZ());
                     moreChunks.onReceiveGameChunk(new CachedChunk(pos, chunkPacket));
                     return; // drop packet, we load it manually
                 }

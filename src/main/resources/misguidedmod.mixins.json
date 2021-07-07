@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.sockmower.misguidedmod.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "MinecraftClientAccessorMixin",
+    "ClientConnectionAccessorMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

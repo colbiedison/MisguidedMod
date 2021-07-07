@@ -3,27 +3,25 @@ package dev.sockmower.misguidedmod;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.play.server.SPacketChunkData;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import org.apache.logging.log4j.Logger;
-import sun.misc.Cache;
 
 public class CachedWorld {
     private final String directory;
     private Logger logger;
-    private Minecraft mc;
-    private MisguidedMod mm;
+    private MinecraftClient mc;
+    private MisguidedClientMod mm;
 
     private Map<String, CachedRegion> regionCache = new ConcurrentHashMap<>();
     private final Set<Pos2> desiredChunks = ConcurrentHashMap.newKeySet();
     private final Set<CachedChunk> chunkWriteQueue = ConcurrentHashMap.newKeySet();
 
-    CachedWorld(Path directory, Logger logger, Minecraft mc, MisguidedMod mm) {
+    CachedWorld(Path directory, Logger logger, MinecraftClient mc, MisguidedClientMod mm) {
         this.logger = logger;
         if (!Files.exists(directory)) {
             try {
@@ -47,7 +45,7 @@ public class CachedWorld {
                             CachedRegion reg = getCachedRegion(pos.x >> 4, pos.z >> 4);
                             CachedChunk x = reg.getChunk(pos);
                             if (x != null) {
-                                mc.addScheduledTask(() -> mm.loadChunk(x));
+                                mc.execute(() -> mm.loadChunk(x));
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -143,7 +141,7 @@ public class CachedWorld {
     }
 
     public void cancelThreads() {
-        CachedChunk poisonedChunk = new CachedChunk(new Pos2(-1, -1), new SPacketChunkData());
+        CachedChunk poisonedChunk = new CachedChunk(new Pos2(-1, -1), new ChunkDataS2CPacket());
         poisonedChunk.poison();
         chunkWriteQueue.add(poisonedChunk);
 
